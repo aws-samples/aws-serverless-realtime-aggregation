@@ -1,0 +1,8 @@
+# All ZIP Files #
+*.zip
+
+# Deployment Folder #
+Deployment/
+
+# Other #
+.DS_Store
