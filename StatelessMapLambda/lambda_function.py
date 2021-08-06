@@ -30,7 +30,7 @@ if TRACK_PERFORMANCE:
 # --------------------------------------------------------------------------------------------------
 
 if TRACK_PERFORMANCE:
-    perf_tracker = PerformanceTrackerInitializer(True, INFLUX_CONNECTION_STRING, KIBANA_INSTANCE_IP)
+    perf_tracker = PerformanceTrackerInitializer(True, INFLUX_CONNECTION_STRING, GRAFANA_INSTANCE_IP)
     event_counter = EventsCounter(['stateless_map_lambda_batch_size', 'stateless_map_lambda_random_failures'])
 
 # --------------------------------------------------------------------------------------------------

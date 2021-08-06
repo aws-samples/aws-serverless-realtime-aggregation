@@ -96,9 +96,9 @@ if FAILURES:
     FAILURE_REDUCE_LAMBDA_PCT           = 2
 
 # --------------------------------------------------------------------------------------------------
-# Kibana / Performance Tracker Settings
+# Grafana / InfluxDB / Performance Tracker Settings
 # --------------------------------------------------------------------------------------------------
 
 TRACK_PERFORMANCE                       = False
 # INFLUX_CONNECTION_STRING                = '<Enter Connection String>'
-# KIBANA_INSTANCE_IP                      = '<Enter Instance IP>'
+# GRAFANA_INSTANCE_IP                      = '<Enter Instance IP>'

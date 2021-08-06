@@ -27,7 +27,7 @@ if TRACK_PERFORMANCE:
 # --------------------------------------------------------------------------------------------------
 
 if TRACK_PERFORMANCE:
-    perf_tracker = PerformanceTrackerInitializer(True, INFLUX_CONNECTION_STRING, KIBANA_INSTANCE_IP)
+    perf_tracker = PerformanceTrackerInitializer(True, INFLUX_CONNECTION_STRING, GRAFANA_INSTANCE_IP)
     event_counter = EventsCounter(['reduce_lambda_batch_size', 'reduce_lambda_message_count',
         'reduce_lambda_random_failures', 'end_to_end_latency_max', 'end_to_end_latency_mean'])
 
