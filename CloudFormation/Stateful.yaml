@@ -340,7 +340,7 @@ Resources:
   Cloud9EnvironmentEC2:
     Type: "AWS::Cloud9::EnvironmentEC2"
     Properties:
-      Name: "StatefulDataGenerator"
+      Name: "StatefulDataProducer"
       Description: "Cloud9Instance"
       ImageId: "ubuntu-18.04-x86_64"
       InstanceType: "m5.large"
