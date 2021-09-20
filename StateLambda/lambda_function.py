@@ -81,7 +81,7 @@ def lambda_handler(event, context):
                                         '#VERSION   = :new_version,' + \
                                         '#HIERARCHY = :new_hierarchy,' + \
                                         '#TIMESTAMP = :new_time',
-                ConditionExpression = 'attribute_not_exists(' + ID_COLUMN_NAME + ') OR ' + VERSION_COLUMN_NAME + '< :new_version',
+                ConditionExpression = 'attribute_not_exists(' + STATE_TABLE_KEY + ') OR ' + VERSION_COLUMN_NAME + '< :new_version',
                 ExpressionAttributeNames={
                     '#VALUE':       VALUE_COLUMN_NAME,
                     '#VERSION':     VERSION_COLUMN_NAME,
