@@ -74,10 +74,12 @@ def clear_table(table_name, primary_key_name, secondary_key_name = None):
                 # Reset list
                 batch_key_list = list()
                 
-                # Print Progress
-                print_progress_bar(count / total_item_count * 100)
-                
+                 # Print Progress
+                print_progress_bar(int ((count + 1) / total_item_count) * 100)
+            
+            # Increment Count    
             count += 1
+            
     print('')
     return True;
 
