@@ -143,11 +143,7 @@ def generate_messages(totals, print_to_console):
 
         # Send Batch to Kinesis Stream
         response = kinesis_client.put_records(StreamName=KINESIS_STREAM_NAME,Records=records)
-        print(response)
-        if ('FailedRecordCount' in response) and response['FailedRecordCount'] > 0:
-            dict_entry_add(thread_totals, "ingestion_failures", response['FailedRecordCount'])
-            print(thread_totals['ingestion_failures'])
-            
+
     if GENERATOR_STORAGE_ACTIVE:
         # Aggregate over Final State
         for entry in thread_state.values():
@@ -204,9 +200,6 @@ print('\nSimple Data producer finished!\nTotal number of messages: {}.\nTotal in
 
 if GENERATOR_STORAGE_ACTIVE:
     
-    if "ingestion_failures" in totals and totals["ingestion_failures"] > 0:
-        print("\nFailed to ingest all messages into the kineis data stream! Number of failed messages: {}\n".format(totals["ingestion_failures"]))
-
     totals = aggregate_along_tree(totals)
     ordered_totals = collections.OrderedDict(sorted(totals.items()))
     print('\nMessage Counts:\n')
