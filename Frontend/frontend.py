@@ -17,16 +17,17 @@ import boto3
 
 # Project Imports
 sys.path.append('../Common')
-from functions import *
-from constants import *
+import constants
 
 # --------------------------------------------------------------------------------------------------
 # Preparation
 # --------------------------------------------------------------------------------------------------
 
+REGION_NAME = "eu-west-1"
+
 # Connect to DynamoDB
-ddb_ressource = boto3.resource(DYNAMO_NAME, region_name=REGION_NAME)
-table = ddb_ressource.Table(AGGREGATE_TABLE_NAME)
+ddb_ressource = boto3.resource(constants.DYNAMO_NAME, region_name=REGION_NAME)
+table = ddb_ressource.Table(constants.AGGREGATE_TABLE_NAME)
 
 # Prepare Terminal
 stdscr = curses.initscr()
@@ -51,12 +52,12 @@ try:
         # Arrange for displaying
         if 'Items' in table_contents:
             for item in table_contents['Items']:
-                identifier = item[AGGREGATE_TABLE_KEY]
-                data[identifier] = item[VALUE_COLUMN_NAME]
+                identifier = item[constants.AGGREGATE_TABLE_KEY]
+                data[identifier] = item[constants.VALUE_COLUMN_NAME]
                     
         if data:
-            message_count = data[MESSAGE_COUNT_NAME]
-            del data[MESSAGE_COUNT_NAME]
+            message_count = data[constants.MESSAGE_COUNT_NAME]
+            del data[constants.MESSAGE_COUNT_NAME]
             
             ordered_data = collections.OrderedDict(sorted(data.items()))
         

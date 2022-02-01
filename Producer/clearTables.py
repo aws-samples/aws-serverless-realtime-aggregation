@@ -13,8 +13,8 @@ import boto3
 
 # Project Imports
 sys.path.append('../Common')
-from functions import *
-from constants import *
+import functions
+import constants
 
 # --------------------------------------------------------------------------------------------------
 # Clear Table: Delete all items of a DDB Table
@@ -26,11 +26,11 @@ def clear_table(table_name, primary_key_name, secondary_key_name = None):
     done = False
     start_key = None
 
-    dynamodb = boto3.resource(DYNAMO_NAME, region_name = REGION_NAME)
+    dynamodb = boto3.resource(constants.DYNAMO_NAME, region_name = constants.REGION_NAME)
     table = dynamodb.Table(table_name)
     
     # Count number of items in table
-    total_item_count = count_items(table)
+    total_item_count = functions.count_items(table)
     count = 0
     
     print('Deleting all ' + str(total_item_count) + ' items from ' + str(table_name) + '...')
@@ -57,9 +57,14 @@ def clear_table(table_name, primary_key_name, secondary_key_name = None):
             
             # Add to key list
             if secondary_key_name is None:
-                key = {primary_key_name: item[primary_key_name]}
+                key = {
+                    primary_key_name: item[primary_key_name]
+                }
             else:
-                key = {primary_key_name: item[primary_key_name], secondary_key_name: item[secondary_key_name]}
+                key = {
+                        primary_key_name: item[primary_key_name], 
+                        secondary_key_name: item[secondary_key_name]
+                    }
             batch_key_list.append(key)
             
             # If batch_size is 25 or last item- delete all items:
@@ -75,18 +80,18 @@ def clear_table(table_name, primary_key_name, secondary_key_name = None):
                 batch_key_list = list()
                 
                  # Print Progress
-                print_progress_bar(int ((count + 1) / total_item_count) * 100)
+                functions.print_progress_bar(int ((count + 1) / total_item_count) * 100)
             
             # Increment Count    
             count += 1
             
     print('')
-    return True;
+    return True
 
 # --------------------------------------------------------------------------------------------------
 # Clear Aggregate Table
 # --------------------------------------------------------------------------------------------------
 
-clear_table(AGGREGATE_TABLE_NAME, AGGREGATE_TABLE_KEY)
+clear_table(constants.AGGREGATE_TABLE_NAME, constants.AGGREGATE_TABLE_KEY)
 #clear_table(STATE_TABLE_NAME, STATE_TABLE_KEY)
 #clear_table(DELTA_TABLE_NAME, DELTA_TABLE_KEY)

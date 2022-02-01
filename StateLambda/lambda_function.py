@@ -16,10 +16,9 @@ import boto3
 from botocore.exceptions import ClientError
 
 # Project Imports
-from functions import *
-from constants import *
+import constants
 
-if TRACK_PERFORMANCE:
+if constants.TRACK_PERFORMANCE:
     from performance_tracker import EventsCounter, PerformanceTrackerInitializer
 
 # --------------------------------------------------------------------------------------------------
@@ -27,8 +26,10 @@ if TRACK_PERFORMANCE:
 # --------------------------------------------------------------------------------------------------
 
 # Performance Tracker
-if TRACK_PERFORMANCE:
-    perf_tracker = PerformanceTrackerInitializer(True, INFLUX_CONNECTION_STRING, GRAFANA_INSTANCE_IP)
+if constants.TRACK_PERFORMANCE:
+    perf_tracker = PerformanceTrackerInitializer(
+            True, constants.INFLUX_CONNECTION_STRING, constants.GRAFANA_INSTANCE_IP
+        )
     event_counter = EventsCounter(['state_lambda_batch_size', 'state_lambda_random_failures'])
 
 # --------------------------------------------------------------------------------------------------
@@ -42,27 +43,27 @@ def lambda_handler(event, context):
     print('Invoked StateLambda with ' + str(len(records)) + ' record(s).')
 
     # Initialize DynamoDB
-    ddb_ressource = boto3.resource(DYNAMO_NAME)
-    table = ddb_ressource.Table(STATE_TABLE_NAME)
+    ddb_ressource = boto3.resource(constants.DYNAMO_NAME)
+    table = ddb_ressource.Table(constants.STATE_TABLE_NAME)
     
     # Loop over records
     for record in records:
 
         # Load Record
-        data = json.loads(base64.b64decode(record[KINESIS_NAME]['data']).decode('utf-8'))
+        data = json.loads(base64.b64decode(record[constants.KINESIS_NAME]['data']).decode('utf-8'))
 
         # Get Entries
-        record_id           = data[ID_COLUMN_NAME]
-        record_hierarchy    = data[HIERARCHY_COLUMN_NAME]
-        record_value        = data[VALUE_COLUMN_NAME]
-        record_version      = data[VERSION_COLUMN_NAME]
-        record_time         = data[TIMESTAMP_COLUMN_NAME]
+        record_id           = data[constants.ID_COLUMN_NAME]
+        record_hierarchy    = data[constants.HIERARCHY_COLUMN_NAME]
+        record_value        = data[constants.VALUE_COLUMN_NAME]
+        record_version      = data[constants.VERSION_COLUMN_NAME]
+        record_time         = data[constants.TIMESTAMP_COLUMN_NAME]
         
         # Manually Introduced Random Failure
-        if random.uniform(0,100) < FAILURE_STATE_LAMBDA_PCT / len(records):
+        if random.uniform(0,100) < constants.FAILURE_STATE_LAMBDA_PCT / len(records):
             
             # Submit measurements
-            if TRACK_PERFORMANCE:
+            if constants.TRACK_PERFORMANCE:
                 event_counter.increment('state_lambda_random_failures', 1)
                 perf_tracker.add_metric_sample(None, event_counter, None, None)
                 perf_tracker.submit_measurements()
@@ -75,18 +76,19 @@ def lambda_handler(event, context):
         try:
             table.update_item(
                 Key = {
-                    STATE_TABLE_KEY: record_id
+                        constants.STATE_TABLE_KEY: record_id
                     },
                 UpdateExpression = 'SET  #VALUE     = :new_value,' + \
                                         '#VERSION   = :new_version,' + \
                                         '#HIERARCHY = :new_hierarchy,' + \
                                         '#TIMESTAMP = :new_time',
-                ConditionExpression = 'attribute_not_exists(' + STATE_TABLE_KEY + ') OR ' + VERSION_COLUMN_NAME + '< :new_version',
+                ConditionExpression = 'attribute_not_exists(' + constants.STATE_TABLE_KEY + 
+                                      ') OR ' + constants.VERSION_COLUMN_NAME + '< :new_version',
                 ExpressionAttributeNames={
-                    '#VALUE':       VALUE_COLUMN_NAME,
-                    '#VERSION':     VERSION_COLUMN_NAME,
-                    '#HIERARCHY':   HIERARCHY_COLUMN_NAME,
-                    '#TIMESTAMP':   TIMESTAMP_COLUMN_NAME
+                    '#VALUE':       constants.VALUE_COLUMN_NAME,
+                    '#VERSION':     constants.VERSION_COLUMN_NAME,
+                    '#HIERARCHY':   constants.HIERARCHY_COLUMN_NAME,
+                    '#TIMESTAMP':   constants.TIMESTAMP_COLUMN_NAME
                     },
                 ExpressionAttributeValues={
                     ':new_version':     record_version,
@@ -108,7 +110,7 @@ def lambda_handler(event, context):
                 raise Exception(e)
             
     # Submit measurements
-    if TRACK_PERFORMANCE:
+    if constants.TRACK_PERFORMANCE:
         event_counter.increment('state_lambda_batch_size', len(records))
         perf_tracker.add_metric_sample(None, event_counter, None, None)
         perf_tracker.submit_measurements()

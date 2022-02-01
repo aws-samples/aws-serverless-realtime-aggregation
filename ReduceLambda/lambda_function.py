@@ -16,18 +16,20 @@ import boto3
 from botocore.exceptions import ClientError
 
 # Project Imports
-from functions import *
-from constants import *
+import functions
+import constants
 
-if TRACK_PERFORMANCE:
+if constants.TRACK_PERFORMANCE:
     from performance_tracker import EventsCounter, PerformanceTrackerInitializer
 
 # --------------------------------------------------------------------------------------------------
 # Initialize Performance Tracker
 # --------------------------------------------------------------------------------------------------
 
-if TRACK_PERFORMANCE:
-    perf_tracker = PerformanceTrackerInitializer(True, INFLUX_CONNECTION_STRING, GRAFANA_INSTANCE_IP)
+if constants.TRACK_PERFORMANCE:
+    perf_tracker = PerformanceTrackerInitializer(
+            True, constants.INFLUX_CONNECTION_STRING, constants.GRAFANA_INSTANCE_IP
+        )
     event_counter = EventsCounter(['reduce_lambda_batch_size', 'reduce_lambda_message_count',
         'reduce_lambda_random_failures', 'end_to_end_latency_max', 'end_to_end_latency_mean'])
 
@@ -45,7 +47,7 @@ def lambda_handler(event, context):
     totals = dict()
 
     # Initialize DDB Ressource
-    ddb_ressource = boto3.resource(DYNAMO_NAME, region_name=REGION_NAME)
+    ddb_ressource = boto3.resource(constants.DYNAMO_NAME, region_name=constants.REGION_NAME)
 
     # Calculate hash to ensure this batch hasn't been processed already:
     record_list_hash = hashlib.md5(str(records).encode()).hexdigest()
@@ -57,10 +59,10 @@ def lambda_handler(event, context):
     for record in event['Records']:
 
         # Aggregate over Batch of Messages the Lambda was invoked with
-        if 'NewImage' in record[DYNAMO_NAME]:
+        if 'NewImage' in record[constants.DYNAMO_NAME]:
 
             # Load Message to Dict
-            message = record[DYNAMO_NAME]['NewImage']['Message']['S'].replace("'",'"')
+            message = record[constants.DYNAMO_NAME]['NewImage']['Message']['S'].replace("'",'"')
             data = json.loads(message)
 
             # Get Batch Count (To Calculate Mean of Timestamp)
@@ -68,10 +70,10 @@ def lambda_handler(event, context):
     
             # Iterate over Entries in Message
             for entry in data:
-                if entry == TIMESTAMP_GENERATOR_FIRST:
-                    dict_entry_min(totals, entry, data[entry])
+                if entry == constants.TIMESTAMP_GENERATOR_FIRST:
+                    functions.dict_entry_min(totals, entry, data[entry])
                 else:
-                    dict_entry_add(totals, entry, data[entry])
+                    functions.dict_entry_add(totals, entry, data[entry])
 
     # If this batch contains only deletes: Done
     if not totals:
@@ -79,24 +81,24 @@ def lambda_handler(event, context):
         return {'statusCode': 200}
 
     # Get Timestamps
-    if TRACK_PERFORMANCE:
-        timestamp_generator_first = totals[TIMESTAMP_GENERATOR_FIRST]
-        del totals[TIMESTAMP_GENERATOR_FIRST]
-        timestamp_generator_mean = totals[TIMESTAMP_GENERATOR_MEAN] / batch_count
-        del totals[TIMESTAMP_GENERATOR_MEAN]
+    if constants.TRACK_PERFORMANCE:
+        timestamp_generator_first = totals[constants.TIMESTAMP_GENERATOR_FIRST]
+        del totals[constants.TIMESTAMP_GENERATOR_FIRST]
+        timestamp_generator_mean = totals[constants.TIMESTAMP_GENERATOR_MEAN] / batch_count
+        del totals[constants.TIMESTAMP_GENERATOR_MEAN]
 
     # Total Count of New Messages (for Printing)
-    total_new_message_count = totals[MESSAGE_COUNT_NAME]
+    total_new_message_count = totals[constants.MESSAGE_COUNT_NAME]
     
     # Update all Values within one single transaction
-    ddb_client = boto3.client(DYNAMO_NAME, region_name=REGION_NAME)
+    ddb_client = boto3.client(constants.DYNAMO_NAME, region_name=constants.REGION_NAME)
     
     # Batch of Items
     batch = [ 
         { 'Update': 
             {
-                'TableName' : AGGREGATE_TABLE_NAME,
-                'Key' : {AGGREGATE_TABLE_KEY : {'S' : entry}},
+                'TableName' : constants.AGGREGATE_TABLE_NAME,
+                'Key' : {constants.AGGREGATE_TABLE_KEY : {'S' : entry}},
                 'UpdateExpression' : "ADD #val :val ",
                 'ExpressionAttributeValues' : {
                     ':val': {'N' : str(totals[entry])}
@@ -120,7 +122,7 @@ def lambda_handler(event, context):
             raise Exception(e)
         
     # Performance Tracker
-    if TRACK_PERFORMANCE:
+    if constants.TRACK_PERFORMANCE:
         event_counter.increment('reduce_lambda_batch_size', len(records))
         event_counter.increment('reduce_lambda_message_count', total_new_message_count)
         event_counter.increment('end_to_end_latency_max', 
@@ -129,10 +131,10 @@ def lambda_handler(event, context):
             float(time.time() - timestamp_generator_mean))
 
     # Manually Introduced Random Failure    
-    if random.uniform(0,100) < FAILURE_REDUCE_LAMBDA_PCT:
+    if random.uniform(0,100) < constants.FAILURE_REDUCE_LAMBDA_PCT:
 
         # Submit Performance Measurements
-        if TRACK_PERFORMANCE:
+        if constants.TRACK_PERFORMANCE:
             event_counter.increment('reduce_lambda_random_failures', 1)
             perf_tracker.add_metric_sample(None, event_counter, None, None)
             perf_tracker.submit_measurements()
@@ -141,7 +143,7 @@ def lambda_handler(event, context):
         raise Exception('Manually Introduced Random Failure!')
 
     # Submit Performance Measurements
-    if TRACK_PERFORMANCE:
+    if constants.TRACK_PERFORMANCE:
         perf_tracker.add_metric_sample(None, event_counter, None, None)
         perf_tracker.submit_measurements()
 

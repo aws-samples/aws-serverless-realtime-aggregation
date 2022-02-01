@@ -13,7 +13,8 @@ Resources:
     Properties:
       Name: "StatelessRiskDataStream"
       RetentionPeriodHours: 24
-      ShardCount: 20      
+      StreamModeDetails:
+          StreamMode: "ON_DEMAND"
       StreamEncryption:
           EncryptionType: "KMS"
           KeyId: "alias/aws/kinesis"

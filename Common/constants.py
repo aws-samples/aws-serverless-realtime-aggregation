@@ -3,10 +3,10 @@
 # --------------------------------------------------------------------------------------------------
 
 # Region
-REGION_NAME                     = INSERT_REGION_TOKEN
+REGION_NAME                     = 'eu-west-1'
 
 # Scenario
-SCENARIO                        = INSERT_SCENARIO_TOKEN
+SCENARIO                        = 'Stateful'
 
 # Kinesis
 KINESIS_NAME                    = 'kinesis'
