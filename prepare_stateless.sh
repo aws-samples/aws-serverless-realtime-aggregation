@@ -17,6 +17,9 @@ pip3 install boto3
 # Create Deployment Directory
 mkdir ./Deployment
 
+# Install all Libraries used by the Lambda Functions
+
+
 # Push Lambda Functions
 chmod +x ./Scripts/updateStatelessLambdas.sh
 ./Scripts/updateStatelessLambdas.sh

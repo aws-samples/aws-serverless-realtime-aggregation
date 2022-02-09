@@ -1,7 +1,6 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-import json
 import boto3
 from influxdb import InfluxDBClient
 
@@ -9,12 +8,7 @@ class PerfTrackerInfluxDBConnector:
 
     def __init__(self, connector_string, influxdb_ip):
 
-        """
-        Expected format of the connection string:
-        "<aws_region_name> <firehose_stream_name>"
-        example:w
-        "eu-west-1 fh_submit_tasks_lambda"
-        """
+        """ TBD """
 
         tokens = connector_string.split(" ")
         self.influxdb_ip = influxdb_ip

@@ -23,10 +23,8 @@ import constants
 # Preparation
 # --------------------------------------------------------------------------------------------------
 
-REGION_NAME = "eu-west-1"
-
 # Connect to DynamoDB
-ddb_ressource = boto3.resource(constants.DYNAMO_NAME, region_name=REGION_NAME)
+ddb_ressource = boto3.resource(constants.DYNAMO_NAME, region_name=constants.REGION_NAME)
 table = ddb_ressource.Table(constants.AGGREGATE_TABLE_NAME)
 
 # Prepare Terminal
